@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  dev-container:
+    build:
+      context: . # /volume3/docker
+      dockerfile: Dockerfile # /volume3/docker/dev-container/Dockerfile
+      args:
+        PUID: ${PUID}
+        PGID: ${PGID}
+    env_file:
+      - ./.env
+    container_name: dev-container
+    restart: unless-stopped
+    volumes:
+      # - /volume3/docker:/workspace
+      - .:/workspace
+    ports:
+      - "2222:22"
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
