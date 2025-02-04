@@ -22,13 +22,8 @@ RUN mkdir -p /home/vscode/.ssh && \
 # Copy SSH configuration files with explicit paths
 COPY --chown=vscode:vscode configs/ssh/authorized_keys /home/vscode/.ssh/authorized_keys
 
-# Set permissions after copy
-RUN chmod 600 /home/vscode/.ssh/authorized_keys && \
-    chown vscode:vscode /home/vscode/.ssh/authorized_keys
-
 # Set final permissions
-RUN chmod 644 /etc/ssh/sshd_config && \
-    chmod 600 /home/vscode/.ssh/authorized_keys && \
+RUN chmod 600 /home/vscode/.ssh/authorized_keys && \
     chown -R vscode:vscode /home/vscode/.ssh && \
     # Set user permissions last to ensure everything is owned correctly
     usermod -u ${PUID} vscode && \
