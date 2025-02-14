@@ -1,8 +1,11 @@
 .env
-.env.*
-!.env.example
-authorized_keys
+.env.server
+**/authorized_keys
 
+workspace/*
+!workspace/.gitkeep
+!workspace/*/
+!workspace/*/.gitkeep
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,intellij+all,git,macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,intellij+all,git,macos
@@ -118,7 +121,6 @@ fabric.properties
 
 # Icon must end with two \r
 Icon
-
 
 # Thumbnails
 ._*
