@@ -1,0 +1,12 @@
+# Very important, use `id` in your terminal to get these values (UID and GID) so that any files created will by owned by the current user on the host
+PUID=501
+PGID=20
+
+TZ="Europe/Zurich"
+SSH_PORT=2222
+
+# Default user for the image is vscode, but you can change that. Permissions should be properly handled.
+DEV_USER="marcus"
+
+# Selects the folder in environments (always based on the base image)
+DEV_ENV="c"

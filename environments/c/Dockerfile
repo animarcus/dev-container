@@ -1,4 +1,4 @@
-FROM dev-container-baase:latest
+FROM dev-container-base:latest
 
 # Install essential C development tools
 RUN apt-get update && \

@@ -25,6 +25,7 @@ services:
       DEV_USER: ${DEV_USER:-devuser}
       TZ: ${TZ:-UTC}
       SSH_PORT: ${SSH_PORT:-2222}
+      DEV_ENV: ${DEV_ENV:-base}
     ports:
       - "${SSH_PORT:-2222}:22"
     volumes:

@@ -7,7 +7,7 @@ to allow you to:
 2. Have local-only development folders
 3. Maintain project-specific configurations
 
-## Suggested Structure
+## Example Structure
 
 ```code
 workspace/
