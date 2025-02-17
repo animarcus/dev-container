@@ -2,10 +2,11 @@
 .env.server
 **/authorized_keys
 
+# Ignore everything in workspace
 workspace/*
-!workspace/.gitkeep
-!workspace/*/
-!workspace/*/.gitkeep
+
+# But keep the README
+!workspace/README.md
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,intellij+all,git,macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,intellij+all,git,macos

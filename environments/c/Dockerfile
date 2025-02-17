@@ -1,15 +1,19 @@
 FROM dev-container-baase:latest
 
-# Install C development tools
+# Install essential C development tools
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    # Basic development tools
+    # Includes gcc and make
     build-essential \
-    cmake \
+    # Debugger
     gdb \
-    valgrind \
+    # Alternative compiler
     clang \
-    clang-format \
-    clang-tidy \
+    # Memory checker
+    valgrind \
+    # Manual pages
+    man-db \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy C specific configurations
