@@ -40,62 +40,58 @@ check_environment() {
 # Setup user and permissions
 setup_user() {
     log "Setting up user..."
+    
+    # Get or create group
+    GROUP_NAME=$(getent group "${PGID}" | cut -d: -f1)
+    if [ -z "$GROUP_NAME" ]; then
+        log "Creating group with GID ${PGID}"
+        groupadd -g "${PGID}" devgroup
+        GROUP_NAME="devgroup"
+    fi
+    log "Using group: ${GROUP_NAME} (${PGID})"
 
-    if id vscode >/dev/null 2>&1; then
-        log "Found vscode user, modifying..."
-
-        # Get the group name for PGID
-        GROUP_NAME=$(getent group "${PGID}" | cut -d: -f1)
-        log "Using group: ${GROUP_NAME} (${PGID})"
-
-        # Rename vscode user to DEV_USER
-        usermod -l "${DEV_USER}" vscode
-
-        # Update UID/GID
+    # Handle user creation/modification
+    if id "$DEV_USER" >/dev/null 2>&1; then
+        log "User $DEV_USER exists, updating properties..."
         usermod -u "${PUID}" "${DEV_USER}"
         usermod -g "${PGID}" "${DEV_USER}"
-
-        # Update home directory
+    elif id vscode >/dev/null 2>&1; then
+        log "Converting vscode user to ${DEV_USER}..."
+        usermod -l "${DEV_USER}" vscode
+        usermod -u "${PUID}" "${DEV_USER}"
+        usermod -g "${PGID}" "${DEV_USER}"
         usermod -d "/home/${DEV_USER}" "${DEV_USER}"
-
-        # Handle home directory with volume mount
-        if [ -d "/home/vscode" ]; then
-            log "Found vscode home directory"
+        
+        # Migrate existing home directory
+        if [ -d "/home/vscode" ] && [ "$(ls -A /home/vscode)" ]; then
+            log "Migrating vscode home contents"
             mkdir -p "/home/${DEV_USER}"
-
-            if [ "$(ls -A /home/vscode)" ]; then
-                log "Copying vscode home contents"
-                cp -a /home/vscode/. "/home/${DEV_USER}/"
-            fi
+            cp -a /home/vscode/. "/home/${DEV_USER}/"
         fi
-
-        # Set up SSH
-        log "Setting up SSH configuration..."
-        debug_ls "/etc/dev/common/ssh"
-
-        mkdir -p "/home/${DEV_USER}/.ssh"
-
-        if [ -f "/etc/dev/common/ssh/authorized_keys" ]; then
-            log "Found authorized_keys file"
-            cp "/etc/dev/common/ssh/authorized_keys" "/home/${DEV_USER}/.ssh/"
-            chmod 700 "/home/${DEV_USER}/.ssh"
-            chmod 600 "/home/${DEV_USER}/.ssh/authorized_keys"
-            debug_ls "/home/${DEV_USER}/.ssh"
-
-            # log "Authorized keys content (first line):"
-            head -n 1 "/home/${DEV_USER}/.ssh/authorized_keys"
-        else
-            log "WARNING: No authorized_keys file found!"
-            debug_ls "/etc/dev/common"
-        fi
-
-        # Set ownership using proper group name
-        log "Setting ownership to ${DEV_USER}:${GROUP_NAME}"
-        chown -R "${DEV_USER}:${GROUP_NAME}" "/home/${DEV_USER}"
     else
-        log "Error: vscode user not found in base image"
-        exit 1
+        log "Creating new user ${DEV_USER}..."
+        useradd -m -u "${PUID}" -g "${PGID}" -s /bin/zsh "${DEV_USER}"
     fi
+
+    # Ensure home directory exists
+    mkdir -p "/home/${DEV_USER}"
+    
+    # Set up SSH configuration
+    log "Setting up SSH configuration..."
+    mkdir -p "/home/${DEV_USER}/.ssh"
+    
+    if [ -f "/etc/dev/common/ssh/authorized_keys" ]; then
+        log "Setting up SSH keys"
+        cp "/etc/dev/common/ssh/authorized_keys" "/home/${DEV_USER}/.ssh/"
+        chmod 700 "/home/${DEV_USER}/.ssh"
+        chmod 600 "/home/${DEV_USER}/.ssh/authorized_keys"
+    else
+        log "WARNING: No authorized_keys file found"
+    fi
+
+    # Set final ownership
+    log "Setting ownership to ${DEV_USER}:${GROUP_NAME}"
+    chown -R "${DEV_USER}:${GROUP_NAME}" "/home/${DEV_USER}"
 }
 
 # Setup SSH
