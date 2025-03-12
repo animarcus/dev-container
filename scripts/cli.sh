@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_NAME="dev-container"
+
+export COMPOSE_BAKE=true
 
 # Source environment variables
 if [ -f "$PROJECT_ROOT/.env" ]; then
@@ -46,22 +49,15 @@ function build_environment() {
 
     if [[ "$full_rebuild" == "true" ]] || [[ "$env_name" == "base" ]]; then
         log "Building base container..."
-        docker compose --profile build-only build $cache_flag base
-
-        if [[ "$?" -ne 0 ]]; then
-            log "Error: Failed to build base container"
-            return 1
-        fi
+        # Use consistent project name
+        docker compose -p $PROJECT_NAME --profile build-only build $cache_flag base
+        # No need for manual tagging
     fi
 
     if [[ "$env_name" != "base" ]]; then
         log "Building $env_name environment..."
-        DEV_ENV="$env_name" docker compose build $cache_flag dev-container
-
-        if [[ "$?" -ne 0 ]]; then
-            log "Error: Failed to build $env_name container"
-            return 1
-        fi
+        # Use same project name
+        DEV_ENV="$env_name" docker compose -p $PROJECT_NAME build $cache_flag dev-container
     fi
 }
 
@@ -73,7 +69,7 @@ function start_environment() {
 
     if [[ "$purge" == "true" ]]; then
         log "Purging all containers and volumes..."
-        docker compose down -v
+        docker compose -p "$PROJECT_NAME" down -v
         rebuild_all=true
     fi
 
@@ -87,7 +83,7 @@ function start_environment() {
 
     if [[ "$?" -eq 0 ]]; then
         log "Starting $env_name environment..."
-        DEV_ENV="$env_name" docker compose up -d
+        DEV_ENV="$env_name" docker compose -p "$PROJECT_NAME" up -d
     else
         log "Error: Build failed, not starting container"
         return 1
@@ -118,10 +114,10 @@ start)
 stop)
     if [[ "$2" == "--clean" ]]; then
         log "Stopping and cleaning up..."
-        docker compose down -v
+        docker compose -p "$PROJECT_NAME" down -v
     else
         log "Stopping containers..."
-        docker compose stop
+        docker compose -p "$PROJECT_NAME" stop
     fi
     ;;
 build)
@@ -143,7 +139,7 @@ build)
     ;;
 clean)
     log "Cleaning all Docker resources..."
-    docker compose down -v
+    docker compose -p "$PROJECT_NAME" down -v
     docker image rm -f dev-container-base:latest
     docker image rm -f $(docker images -q 'dev-container-*')
     ;;

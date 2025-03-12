@@ -40,7 +40,7 @@ check_environment() {
 # Setup user and permissions
 setup_user() {
     log "Setting up user..."
-    
+
     # Get or create group
     GROUP_NAME=$(getent group "${PGID}" | cut -d: -f1)
     if [ -z "$GROUP_NAME" ]; then
@@ -61,7 +61,7 @@ setup_user() {
         usermod -u "${PUID}" "${DEV_USER}"
         usermod -g "${PGID}" "${DEV_USER}"
         usermod -d "/home/${DEV_USER}" "${DEV_USER}"
-        
+
         # Migrate existing home directory
         if [ -d "/home/vscode" ] && [ "$(ls -A /home/vscode)" ]; then
             log "Migrating vscode home contents"
@@ -75,11 +75,11 @@ setup_user() {
 
     # Ensure home directory exists
     mkdir -p "/home/${DEV_USER}"
-    
+
     # Set up SSH configuration
     log "Setting up SSH configuration..."
     mkdir -p "/home/${DEV_USER}/.ssh"
-    
+
     if [ -f "/etc/dev/common/ssh/authorized_keys" ]; then
         log "Setting up SSH keys"
         cp "/etc/dev/common/ssh/authorized_keys" "/home/${DEV_USER}/.ssh/"
@@ -124,15 +124,20 @@ setup_zsh() {
     cp /etc/dev/common/oh-my-zsh-setup/.zshrc "${DEV_HOME}/.zshrc"
     cp /etc/dev/common/oh-my-zsh-setup/.p10k.zsh "${DEV_HOME}/.p10k.zsh"
 
+    # Ensure custom directories exist
+    mkdir -p "${DEV_HOME}/.oh-my-zsh/custom/plugins"
+    mkdir -p "${DEV_HOME}/.oh-my-zsh/custom/themes"
+
+    # Copy plugins and themes from /etc
+    cp -r /etc/oh-my-zsh/custom/plugins/* "${DEV_HOME}/.oh-my-zsh/custom/plugins/"
+    cp -r /etc/oh-my-zsh/custom/themes/* "${DEV_HOME}/.oh-my-zsh/custom/themes/"
+
     # Set correct permissions
+    chown -R "${DEV_USER}:$(id -gn "${DEV_USER}")" "${DEV_HOME}/.oh-my-zsh"
     chown "${DEV_USER}:$(id -gn "${DEV_USER}")" "${DEV_HOME}/.zshrc" "${DEV_HOME}/.p10k.zsh"
 
-    # Set ZSH as default shell for the user
+    # Set ZSH as default shell
     chsh -s "$(which zsh)" "${DEV_USER}"
-
-    # Copy Oh My Zsh configurations to the correct location
-    cp -r /root/.oh-my-zsh "${DEV_HOME}/.oh-my-zsh"
-    chown -R "${DEV_USER}:$(id -gn "${DEV_USER}")" "${DEV_HOME}/.oh-my-zsh"
 }
 
 # Main

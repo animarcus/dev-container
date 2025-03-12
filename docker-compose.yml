@@ -1,13 +1,13 @@
 services:
   base:
+    image: dev-container-base:latest
     build:
       context: .
       dockerfile: environments/base/Dockerfile
       args:
         PUID: ${PUID:-1000}
         PGID: ${PGID:-1000}
-        DEV_USER: ${DEV_USER:-devuser}
-    image: dev-container-base:latest
+        DEV_USER: ${DEV_USER:-vscode}
     profiles:
       - build-only
   
@@ -18,18 +18,18 @@ services:
       args:
         PUID: ${PUID:-1000}
         PGID: ${PGID:-1000}
-        DEV_USER: ${DEV_USER:-devuser}
+        DEV_USER: ${DEV_USER:-vscode}
     environment:
       PUID: ${PUID:-1000}
       PGID: ${PGID:-1000}
-      DEV_USER: ${DEV_USER:-devuser}
+      DEV_USER: ${DEV_USER:-vscode}
       TZ: ${TZ:-UTC}
       SSH_PORT: ${SSH_PORT:-2222}
       DEV_ENV: ${DEV_ENV:-base}
     ports:
       - "${SSH_PORT:-2222}:22"
     volumes:
-      - ./workspace:/home/${DEV_USER:-devuser}/workspace
+      - ./workspace:/home/${DEV_USER:-vscode}/workspace
       - dev_home:/home/${DEV_USER:-marcus}
       - ./configs/common:/etc/dev/common
       - ./configs/env-specific/${DEV_ENV:-base}:/etc/dev/env-specific
