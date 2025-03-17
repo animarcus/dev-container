@@ -33,7 +33,10 @@ services:
       - dev_home:/home/${DEV_USER:-marcus}
       - ./configs/common:/etc/dev/common
       - ./configs/env-specific/${DEV_ENV:-base}:/etc/dev/env-specific
+      - ide_backend_cache:/home/${DEV_USER:-vscode}/.cache/JetBrains/RemoteDev/dist
 
 volumes:
   dev_home:
     name: dev_home_${DEV_ENV:-base}
+  ide_backend_cache:
+    name: ide_backend_cache_${DEV_ENV:-base}
