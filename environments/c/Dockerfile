@@ -17,6 +17,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
     man-db \
     # From the project guidelines
     manpages \
+    # For scan-build and others
+    clang-tools \
     manpages-dev \
     doxygen \
     graphviz \
