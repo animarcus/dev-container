@@ -1,5 +1,42 @@
 # Dev container for easier development
 
+## Using this repo
+
+Make sure to add your public SSH key to `config/common/ssh/authorized_keys` so that the container can recognize you!
+
+```bash
+cd /path/to/this/repo/root
+cp /path/to/your/.pub/ssh/key ./configs/common/ssh/authorized_keys
+```
+
+It might be useful to change your ssh config, so that you can more easily connect to the container
+Here is an example of a section of the `~/.ssh/config` file.
+
+```bash
+Host dev-containers
+    Port 2222
+    User marcus
+    HostName localhost
+    UserKnownHostsFile /dev/null
+    StrictHostKeyChecking no
+    SetEnv TERM=xterm-256color
+```
+
+Make sure you also have the `.env` file with the right environment variables (necessary for building and running the containers).
+
+```bash
+cp ./env-example ./.env
+```
+
+Finally, to run the dev-container
+
+```bash
+docker compose build base dev-container && \
+docker compose up -d dev-container
+```
+
+## What this project is
+
 This project serves as a dev container management with different development environments.
 
 I started working on this repo because I wanted a portable dev environment I could set up anywhere, provided I have Docker installed. This allows me then to connect to the container through port `2222` and use an IDE which accesses the system remotely, allowing for a native-like experience inside a container.

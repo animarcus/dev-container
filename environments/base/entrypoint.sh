@@ -91,7 +91,7 @@ setup_user() {
 
     # Set final ownership
     log "Setting ownership to ${DEV_USER}:${GROUP_NAME}"
-    chown -R "${DEV_USER}:${GROUP_NAME}" "/home/${DEV_USER}"
+    chown -R "${DEV_USER}:${GROUP_NAME}" "/home/${DEV_USER}" 2>/dev/null || true
 }
 
 # Setup SSH

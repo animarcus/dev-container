@@ -141,7 +141,7 @@ clean)
     log "Cleaning all Docker resources..."
     docker compose -p "$PROJECT_NAME" down -v
     docker image rm -f dev-container-base:latest
-    docker image rm -f $(docker images -q 'dev-container-*')
+    docker image rm -f "$(docker images -q 'dev-container-*')"
     ;;
 list)
     echo "Available environments:"

@@ -6,7 +6,7 @@ TZ="Europe/Zurich"
 SSH_PORT=2222
 
 # Default user for the image is vscode, but you can change that. Permissions should be properly handled.
-DEV_USER="marcus"
+DEV_USER="user"
 
 # Selects the folder in environments (always based on the base image)
 DEV_ENV="c"

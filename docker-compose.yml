@@ -8,6 +8,8 @@ services:
         PUID: ${PUID:-1000}
         PGID: ${PGID:-1000}
         DEV_USER: ${DEV_USER:-vscode}
+    env_file:
+      - .env
     profiles:
       - build-only
   
@@ -19,6 +21,8 @@ services:
         PUID: ${PUID:-1000}
         PGID: ${PGID:-1000}
         DEV_USER: ${DEV_USER:-vscode}
+    env_file:
+      - .env
     environment:
       PUID: ${PUID:-1000}
       PGID: ${PGID:-1000}
@@ -29,7 +33,7 @@ services:
     ports:
       - "${SSH_PORT:-2222}:22"
     volumes:
-      - ./workspace:/home/${DEV_USER:-vscode}/workspace
+      - ./workspace:/home/${DEV_USER:-vscode}/workspace:rw,delegated
       - dev_home:/home/${DEV_USER:-marcus}
       - ./configs/common:/etc/dev/common
       - ./configs/env-specific/${DEV_ENV:-base}:/etc/dev/env-specific
