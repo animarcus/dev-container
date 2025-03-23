@@ -19,6 +19,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     manpages \
     # For scan-build and others
     clang-tools \
+    check \
     manpages-dev \
     doxygen \
     graphviz \
