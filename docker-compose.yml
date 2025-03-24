@@ -1,5 +1,6 @@
 services:
   base:
+    container_name: dev-container-base
     image: dev-container-base:latest
     build:
       context: .
@@ -11,9 +12,10 @@ services:
     env_file:
       - .env
     profiles:
-      - build-only
+      - never-start
   
   dev-container:
+    container_name: dev-container-${DEV_ENV:-base}
     build:
       context: .
       dockerfile: environments/${DEV_ENV:-base}/Dockerfile
@@ -34,7 +36,7 @@ services:
       - "${SSH_PORT:-2222}:22"
     volumes:
       - ./workspace:/home/${DEV_USER:-vscode}/workspace:rw,delegated
-      - dev_home:/home/${DEV_USER:-marcus}
+      - dev_home:/home/${DEV_USER:-vscode}
       - ./configs/common:/etc/dev/common
       - ./configs/env-specific/${DEV_ENV:-base}:/etc/dev/env-specific
       - ide_backend_cache:/home/${DEV_USER:-vscode}/.cache/JetBrains/RemoteDev/dist
