@@ -37,6 +37,7 @@ services:
     volumes:
       - ./workspace:/home/${DEV_USER:-vscode}/workspace:rw,delegated
       - dev_home:/home/${DEV_USER:-vscode}
+      # mount configs for different IDEs, or specific environments
       - ./configs/common:/etc/dev/common
       - ./configs/env-specific/${DEV_ENV:-base}:/etc/dev/env-specific
       - ide_backend_cache:/home/${DEV_USER:-vscode}/.cache/JetBrains/RemoteDev/dist

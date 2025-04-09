@@ -27,8 +27,13 @@ RUN --mount=type=cache,target=/var/cache/apt \
     libssl-doc \
     libvips-dev \
     libjson-c-dev \
+    # For end-to-end tests
+    python3 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy C specific configurations
 COPY configs/env-specific/c /etc/dev/env-specific/c
+
+# Create python symlink
+RUN ln -sf /usr/bin/python3 /usr/bin/python
