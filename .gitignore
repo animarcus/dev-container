@@ -19,6 +19,8 @@ workspace/*
 **/*.out
 **/*.exe
 
+docker-compose.override.yml
+
 # Created by https://www.toptal.com/developers/gitignore/api/git,linux,macos,windows,cmake,jetbrains+all,visualstudiocode,gpg
 # Edit at https://www.toptal.com/developers/gitignore?templates=git,linux,macos,windows,cmake,jetbrains+all,visualstudiocode,gpg
 
