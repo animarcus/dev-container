@@ -140,6 +140,23 @@ setup_zsh() {
     chsh -s "$(which zsh)" "${DEV_USER}"
 }
 
+setup_scripts() {
+    log "Setting up utility custom scripts..."
+
+    # Ensure ~/bin dir exists
+    mkdir -p "$DEV_HOME/bin"
+
+    # Create symlinks for trews and universal copy
+    ln -sf /etc/dev/common/scripts/trews/trews.sh "$DEV_HOME/bin/trews"
+    ln -sf /etc/dev/common/scripts/trews/universal-copy.sh "$DEV_HOME/bin/universal-copy"
+
+    # Set correct permissions for the bin and links
+    chown -R "${DEV_USER}:$(id -gn "${DEV_USER}")" "$DEV_HOME/bin"
+    chmod -R 755 "$DEV_HOME/bin"
+
+    log "Utility scripts symlinked in ~/bin"
+}
+
 # Main
 main() {
     log "Starting initialization..."
@@ -147,6 +164,7 @@ main() {
     setup_user
     setup_ssh
     setup_zsh
+    setup_scripts
     log "Starting SSH daemon..."
     exec /usr/sbin/sshd -D -e
 }

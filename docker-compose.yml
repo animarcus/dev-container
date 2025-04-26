@@ -11,9 +11,11 @@ services:
         DEV_USER: ${DEV_USER:-vscode}
     env_file:
       - .env
-    profiles:
-      - never-start
-  
+    deploy:
+      # This prevents the service from being started
+      restart_policy:
+        condition: none
+
   dev-container:
     container_name: dev-container-${DEV_ENV:-base}
     build:

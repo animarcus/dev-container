@@ -1,0 +1,28 @@
+{
+    "general_ignores": [
+        "*pycache*",
+        "node_modules",
+        "storage",
+        "\\.vscode",
+        "\\.idea",
+        "\\.venv/*",
+        "\\.git",
+        "\\.DS_Store*",
+        "build",
+        "dist",
+        "temp",
+        "logs",
+        "coverage"
+    ],
+    "directory_ignores": {
+        "/Users/marcushamelink/Developer/homelink/dev-container/": [
+            "c_projects"
+        ],
+        "/Users/marcushamelink/Developer/digital-twin": [
+            "Code\\?DELETE",
+            "Diagrams",
+            "old_dt_antenna*",
+            "./app/env/*"
+        ]
+    }
+}
