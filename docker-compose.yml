@@ -2,19 +2,16 @@ services:
   base:
     container_name: dev-container-base
     image: dev-container-base:latest
+    profiles: ["build-only"]
     build:
       context: .
       dockerfile: environments/base/Dockerfile
       args:
-        PUID: ${PUID:-1000}
-        PGID: ${PGID:-1000}
+        PUID: ${PUID:?You must set PUID in .env file}
+        PGID: ${PGID:?You must set PGID in .env file}
         DEV_USER: ${DEV_USER:-vscode}
     env_file:
       - .env
-    deploy:
-      # This prevents the service from being started
-      restart_policy:
-        condition: none
 
   dev-container:
     container_name: dev-container-${DEV_ENV:-base}
@@ -22,15 +19,12 @@ services:
       context: .
       dockerfile: environments/${DEV_ENV:-base}/Dockerfile
       args:
-        PUID: ${PUID:-1000}
-        PGID: ${PGID:-1000}
+        PUID: ${PUID:?You must set PUID in .env file}
+        PGID: ${PGID:?You must set PGID in .env file}
         DEV_USER: ${DEV_USER:-vscode}
     env_file:
       - .env
     environment:
-      PUID: ${PUID:-1000}
-      PGID: ${PGID:-1000}
-      DEV_USER: ${DEV_USER:-vscode}
       TZ: ${TZ:-UTC}
       SSH_PORT: ${SSH_PORT:-2222}
       DEV_ENV: ${DEV_ENV:-base}

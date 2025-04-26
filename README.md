@@ -1,38 +1,104 @@
 # Dev container for easier development
 
-## Using this repo
+## Setup and Installation
 
-Make sure to add your public SSH key to `config/common/ssh/authorized_keys` so that the container can recognize you!
+### 1. Configure environment variables
 
-```bash
-cd /path/to/this/repo/root
-cp /path/to/your/.pub/ssh/key ./configs/common/ssh/authorized_keys
-```
-
-It might be useful to change your ssh config, so that you can more easily connect to the container
-Here is an example of a section of the `~/.ssh/config` file.
-
-```bash
-Host dev-containers
-    Port 2222
-    User marcus
-    HostName localhost
-    UserKnownHostsFile /dev/null
-    StrictHostKeyChecking no
-    SetEnv TERM=xterm-256color
-```
-
-Make sure you also have the `.env` file with the right environment variables (necessary for building and running the containers).
+Create your `.env` file from the template:
 
 ```bash
 cp ./env-example ./.env
 ```
 
-Finally, to run the dev-container
+Then edit the `.env` file to fill in the required values:
 
 ```bash
-docker compose build base dev-container && \
+# Run the 'id' command to get your user and group IDs
+id
+
+# Example output: uid=501(username) gid=20(groupname) ...
+# Open .env in your editor and add these values:
+#   PUID=501
+#   PGID=20
+```
+
+⚠️ **IMPORTANT**: The build will fail if you don't set PUID and PGID values. This is intentional to ensure proper file permissions between your host system and the container.
+
+The other environment variables (DEV_USER, TZ, SSH_PORT, DEV_ENV) are pre-configured in the env-example with sensible defaults, but you can customize them as needed.
+
+### 2. Add your SSH key
+
+```bash
+# Create the SSH directory if needed
+mkdir -p ./configs/common/ssh
+
+# Copy your SSH public key to authorized_keys
+cp ~/.ssh/id_rsa.pub ./configs/common/ssh/authorized_keys
+```
+
+### 3. Build and run containers
+
+```bash
+# Build the base container (provides foundation for all environments)
+docker compose build base
+
+# Build the development container 
+# (Uses DEV_ENV from .env to determine which environment to build)
+docker compose build dev-container
+
+# Start only the dev container (base is just for building)
 docker compose up -d dev-container
+```
+
+### 4. Connect to your container
+
+```bash
+# Connect via SSH (replace vscode with your DEV_USER value if changed)
+ssh -p 2222 vscode@localhost
+```
+
+Or add this to your `~/.ssh/config` for easier connection:
+
+```
+Host dev-containers
+    Port 2222
+    User vscode          # Change this to match your DEV_USER in .env
+    HostName localhost
+    UserKnownHostsFile /dev/null
+    StrictHostKeyChecking no
+```
+
+Then connect with `ssh dev-containers`.
+
+## Using Different Environments
+
+The repository supports multiple development environments:
+
+```bash
+# For C development (edit DEV_ENV="c" in .env)
+docker compose up -d dev-container
+
+# For base environment (edit DEV_ENV="base" in .env)
+docker compose up -d dev-container
+
+# Alternative: Override environment without editing .env
+DEV_ENV=c docker compose up -d dev-container
+```
+
+## CLI Usage
+
+```bash
+# Full rebuild from scratch (like your working command):
+./cli.sh start c --rebuild
+
+# Quick start without rebuild:
+./cli.sh start c
+
+# Rebuild only environment container:
+./cli.sh start c --rebuild-env
+
+# Complete purge and rebuild:
+./cli.sh start c --purge
 ```
 
 ## What this project is
@@ -50,22 +116,6 @@ You can run the dev-container container from the `docker-compose.yml`, but the C
 I set up my base development environment that I want anyway, and then I add onto them for any other projects I work on. Hence the `environments/c/` folder which uses the base image and then installs some more programs that are needed. There is a template to show how to extend the setup with your own Dockerfile.
 
 The `/workspace` folder inside the container is mounted to the same folder inside this repo. It is ignored by this current repo so that you can do whatever you want inside of it. Make sure to create your own `.env` file following the `env-example`, this is crucial for user permissions of the files created from within the container.
-
-## CLI Usage
-
-```bash
-# Full rebuild from scratch (like your working command):
-./cli.sh start c --rebuild
-
-# Quick start without rebuild:
-./cli.sh start c
-
-# Rebuild only environment container:
-./cli.sh start c --rebuild-env
-
-# Complete purge and rebuild:
-./cli.sh start c --purge
-```
 
 ## Config
 
