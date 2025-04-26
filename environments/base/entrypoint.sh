@@ -89,9 +89,27 @@ setup_user() {
         log "WARNING: No authorized_keys file found"
     fi
 
-    # Set final ownership
-    log "Setting ownership to ${DEV_USER}:${GROUP_NAME}"
-    chown -R "${DEV_USER}:${GROUP_NAME}" "/home/${DEV_USER}" 2>/dev/null || true
+    # Set targeted ownership of critical files and directories
+    log "Setting targeted ownership for ${DEV_USER}:${GROUP_NAME}"
+
+    # Fix ownership of the home directory itself (non-recursive)
+    chown "${DEV_USER}:${GROUP_NAME}" "/home/${DEV_USER}" 2>/dev/null || true
+
+    # Fix ownership of critical dot-directories
+    log "Setting ownership of configuration directories"
+    for dir in .ssh .config .cache .oh-my-zsh .local .npm .nvm bin; do
+        if [ -d "/home/${DEV_USER}/$dir" ]; then
+            log "  - /home/${DEV_USER}/$dir"
+            chown -R "${DEV_USER}:${GROUP_NAME}" "/home/${DEV_USER}/$dir" 2>/dev/null || true
+        fi
+    done
+
+    # Fix ownership of dotfiles in home directory (non-recursive)
+    log "Setting ownership of configuration files"
+    find "/home/${DEV_USER}" -maxdepth 1 -name ".*" -type f -print0 | xargs -0 -r chown "${DEV_USER}:${GROUP_NAME}" 2>/dev/null || true
+
+    # Skip recursive ownership change for likely mount points
+    log "Skipping recursive ownership for mounted directories and large volumes"
 }
 
 # Setup SSH
