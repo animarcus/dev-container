@@ -31,12 +31,12 @@ services:
     ports:
       - "${SSH_PORT:-2222}:22"
     volumes:
-      - ./workspace:/home/${DEV_USER:-vscode}/workspace:rw,delegated
-      - dev_home:/home/${DEV_USER:-vscode}
+      - ./workspace:/home/${DEV_USER}/workspace:rw,delegated
+      - dev_home:/home/${DEV_USER}
       # mount configs for different IDEs, or specific environments
       - ./configs/common:/etc/dev/common
       - ./configs/env-specific/${DEV_ENV:-base}:/etc/dev/env-specific
-      - ide_backend_cache:/home/${DEV_USER:-vscode}/.cache/JetBrains/RemoteDev/dist
+      - ide_backend_cache:/home/${DEV_USER}/.cache/JetBrains/RemoteDev/dist
 
 volumes:
   dev_home:
