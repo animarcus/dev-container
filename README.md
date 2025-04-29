@@ -1,6 +1,7 @@
 # Dev container for easier development
 
 ## Table of Contents
+
 - [Dev container for easier development](#dev-container-for-easier-development)
   - [Table of Contents](#table-of-contents)
   - [What this project is](#what-this-project-is)
@@ -14,6 +15,7 @@
   - [Config](#config)
   - [Customizing Your Environment](#customizing-your-environment)
     - [Adding Custom Volume Mounts](#adding-custom-volume-mounts)
+    - [File Permissions](#file-permissions)
 
 ## What this project is
 
@@ -160,3 +162,14 @@ services:
 This approach keeps your custom settings separate from the main configuration. Docker Compose automatically merges this file with the main `docker-compose.yml` when you run commands.
 
 No additional steps are needed - just create the file and run `docker compose up -d dev-container` as usual.
+
+### File Permissions
+
+By default, the container only changes ownership recursively for critical directories to balance performance and functionality. If you experience permission issues with IDEs like CLion when using Remote SSH, you can enable recursive ownership:
+
+```env
+# In your .env file
+RECURSIVE_CHOWN=true
+```
+
+> [!note] Note that enabling recursive ownership will make container startup slower, especially for large project directories, but it ensures consistent file permissions throughout your workspace.

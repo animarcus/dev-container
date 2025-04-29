@@ -28,6 +28,7 @@ services:
       TZ: ${TZ:-UTC}
       SSH_PORT: ${SSH_PORT:-2222}
       DEV_ENV: ${DEV_ENV:-base}
+      RECURSIVE_CHOWN: ${RECURSIVE_CHOWN:-false}
     ports:
       - "${SSH_PORT:-2222}:22"
     volumes:

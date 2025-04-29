@@ -4,6 +4,11 @@
 PUID=
 PGID=
 
+# Optional: Set to "true" to recursively change ownership of all files
+# Warning: This can be slow for large directories
+# Default: false (only critical directories are changed recursively)
+RECURSIVE_CHOWN=false
+
 # Timezone setting
 TZ="Europe/Zurich"
 

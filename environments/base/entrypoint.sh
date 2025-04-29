@@ -88,28 +88,76 @@ setup_user() {
     else
         log "WARNING: No authorized_keys file found"
     fi
+}
 
-    # Set targeted ownership of critical files and directories
-    log "Setting targeted ownership for ${DEV_USER}:${GROUP_NAME}"
+# Set ownership of files and directories with progress indicators
+setup_permissions() {
+    local start_time
+    local home_path="/home/${DEV_USER}"
+
+    log "Setting up ownership for ${DEV_USER}:${GROUP_NAME}"
 
     # Fix ownership of the home directory itself (non-recursive)
-    chown "${DEV_USER}:${GROUP_NAME}" "/home/${DEV_USER}" 2>/dev/null || true
+    chown "${DEV_USER}:${GROUP_NAME}" "$home_path" 2>/dev/null || true
 
-    # Fix ownership of critical dot-directories
-    log "Setting ownership of configuration directories"
-    for dir in .ssh .config .cache .oh-my-zsh .local .npm .nvm bin; do
-        if [ -d "/home/${DEV_USER}/$dir" ]; then
-            log "  - /home/${DEV_USER}/$dir"
-            chown -R "${DEV_USER}:${GROUP_NAME}" "/home/${DEV_USER}/$dir" 2>/dev/null || true
-        fi
-    done
+    # Option to recursively set ownership
+    RECURSIVE_CHOWN=${RECURSIVE_CHOWN:-"false"}
 
-    # Fix ownership of dotfiles in home directory (non-recursive)
-    log "Setting ownership of configuration files"
-    find "/home/${DEV_USER}" -maxdepth 1 -name ".*" -type f -print0 | xargs -0 -r chown "${DEV_USER}:${GROUP_NAME}" 2>/dev/null || true
+    if [ "$RECURSIVE_CHOWN" = "true" ]; then
+        log "Starting recursive ownership change for entire home directory..."
+        log "This may take a while for large directories"
+        start_time=$(date +%s)
 
-    # Skip recursive ownership change for likely mount points
-    log "Skipping recursive ownership for mounted directories and large volumes"
+        # Create a simple progress counter
+        progress_file="/tmp/chown_progress"
+        echo "0" >"$progress_file"
+
+        # Start background process to show progress every 5 seconds
+        (
+            while [ -f "$progress_file" ]; do
+                if [ -f "$progress_file" ]; then
+                    current=$(cat "$progress_file")
+                    elapsed=$(($(date +%s) - start_time))
+                    if [ $elapsed -gt 0 ]; then
+                        log "Processed files: $current, elapsed time: ${elapsed}s"
+                    fi
+                fi
+                sleep 5
+            done
+        ) &
+        progress_pid=$!
+
+        # Process files in batches for better performance
+        find "$home_path" -xdev -print0 | while IFS= read -d $'\0' -r file; do
+            chown -f "${DEV_USER}:${GROUP_NAME}" "$file" 2>/dev/null || true
+            count=$(($(cat "$progress_file") + 1))
+            echo "$count" >"$progress_file"
+        done
+
+        # Clean up progress monitoring
+        rm -f "$progress_file"
+        kill $progress_pid 2>/dev/null || true
+
+        total_time=$(($(date +%s) - start_time))
+        log "Recursive ownership complete! Took ${total_time} seconds"
+    else
+        # Fix ownership of critical dot-directories
+        log "Setting ownership of configuration directories"
+        for dir in .ssh .config .cache .oh-my-zsh .local .npm .nvm bin; do
+            dir_path="$home_path/$dir"
+            if [ -d "$dir_path" ]; then
+                log "  - $dir_path"
+                chown -R "${DEV_USER}:${GROUP_NAME}" "$dir_path" 2>/dev/null || true
+            fi
+        done
+
+        # Fix ownership of dotfiles in home directory (non-recursive)
+        log "Setting ownership of configuration files"
+        find "$home_path" -maxdepth 1 -name ".*" -type f -print0 | xargs -0 -r chown "${DEV_USER}:${GROUP_NAME}" 2>/dev/null || true
+
+        log "Skipped recursive ownership for mounted directories and large volumes"
+        log "To enable recursive ownership, set RECURSIVE_CHOWN=true in your .env file"
+    fi
 }
 
 # Setup SSH
@@ -180,10 +228,28 @@ main() {
     log "Starting initialization..."
     check_environment
     setup_user
+    setup_permissions
     setup_ssh
     setup_zsh
     setup_scripts
+
+    # Get external SSH port for connection info
+    EXTERNAL_SSH_PORT=${SSH_PORT:-2222}
+
     log "Starting SSH daemon..."
+    log "=========================================================="
+    log "CONNECTION INFORMATION:"
+    log "   SSH Command: ssh -p ${EXTERNAL_SSH_PORT} ${DEV_USER}@localhost"
+    log ""
+    log "   For easier connection, add this to your ~/.ssh/config:"
+    log "   Host dev-container"
+    log "       Port ${EXTERNAL_SSH_PORT}"
+    log "       User ${DEV_USER}"
+    log "       HostName localhost"
+    log "       StrictHostKeyChecking no"
+    log "=========================================================="
+
+    # Run sshd with reduced verbosity but still in foreground
     exec /usr/sbin/sshd -D -e
 }
 
